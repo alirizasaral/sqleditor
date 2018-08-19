@@ -1,0 +1,4 @@
+gunicorn
+Flask==1.0.2
+ibm-db==2.0.8a0
+
