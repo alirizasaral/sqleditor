@@ -1,10 +1,13 @@
 {
     "compilerOptions": {
       "outDir": "./dist/",
-      "noImplicitAny": true,
+      "noImplicitAny": false,
       "sourceMap": true,
       "module": "es6",
       "target": "es5",
-      "allowJs": true
+      "allowJs": true,
+      // this enables stricter inference for data properties on `this`
+      "strict": true,
+      "moduleResolution": "node"
     }
   }

@@ -2,6 +2,7 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'development',
   entry: './index.ts',
   devtool: 'inline-source-map',
   module: {
@@ -18,7 +19,10 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ]
+    alias: {
+      'vue$': 'vue/dist/vue.esm.js'
+    },
+    extensions: [ '.tsx', '.ts', '.js', '.vue', '.json' ]
   },
   output: {
     filename: 'bundle.js',

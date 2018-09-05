@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --progress -p",
-    "watch": "webpack --progress --watch"
+    "watch": "webpack --progress --watch",
+    "server": "webpack-dev-server --open"
   },
   "keywords": [
     "sql",
@@ -18,16 +19,19 @@
   "author": "aliriza.saral@gmail.com",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^10.9.4",
     "css-loader": "^1.0.0",
     "style-loader": "^0.23.0",
     "ts-loader": "^4.5.0",
     "typescript": "^3.0.3",
     "webpack": "^4.16.5",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.5"
+    "webpack-dev-server": "^3.1.7"
   },
   "dependencies": {
     "codemirror": "^5.40.0",
-    "vue": "^2.5.17"
+    "jquery": "^3.3.1",
+    "vue": "^2.5.17",
+    "vue-toasted": "^1.1.24"
   }
 }
