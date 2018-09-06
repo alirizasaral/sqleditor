@@ -57,6 +57,11 @@
                 <p>
                   <input type="button" class="btn btn-success btn-lg" value="Execute" role="button" v-on:click="execute()"></input>
                 </p>
+                <p>
+                    <button class="bookmark-btn" type="button" v-on:click="addBookmark()">
+                        <span class="glyphicon glyphicon-star"></span>&nbsp;Bookmark Query
+                    </button>
+                </p>
               </form>
           </div>
         </div>
@@ -97,29 +102,12 @@
             </div>
             <div class="panel-body">
               <ul>
-                <li style="padding: 2px 5px"><code id="sql-query-1">SELECT * FROM ABS.TVERSION;</code>              
+                <li v-for="(bookmark, index) in bookmarks" :key="bookmark" style="padding: 2px 5px"><code id="sql-query-1">{{bookmark}}</code>              
                   <button class="copytoeditor-btn btn btn-xs" type="submit" data-clipboard-target="#sql-query-1">
                     <span class="glyphicon glyphicon-copy"></span>&nbsp;Copy into Editor
                   </button>
-                </li>
-                <li style="padding: 2px 5px"><code id="sql-query-2">SELECT DISTINCT(anlagejahr || ' ' || nummer) AS Claims FROM ABS.TSCHADEN;</code>              
-                  <button class="copytoeditor-btn btn btn-xs" type="submit" data-clipboard-target="#sql-query-2">
-                    <span class="glyphicon glyphicon-copy"></span>&nbsp;Copy into Editor
-                  </button>
-                </li>
-                <li style="padding: 2px 5px"><code id="sql-query-3">SELECT DISTINCT(firma || pollfnr) AS Contracts, stadium AS Phase FROM ABS.TVERTRAG WHERE pollfnr != '';</code>              
-                  <button class="copytoeditor-btn btn btn-xs" type="submit" data-clipboard-target="#sql-query-3">
-                    <span class="glyphicon glyphicon-copy"></span>&nbsp;Copy into Editor
-                  </button>
-                </li>
-                <li style="padding: 2px 5px"><code id="sql-query-4">UPDATE ABS.TGSCHFALL SET GSTUEBERNZEIT = '0005-01-01 00:00:00.0' WHERE gf# = (SELECT gf# FROM ABS.TVERTRAG WHERE pollfnr = '8000731920');</code>
-                  <button class="copytoeditor-btn btn btn-xs" type="submit" data-clipboard-target="#sql-query-4">
-                    <span class="glyphicon glyphicon-copy"></span>&nbsp;Copy into Editor
-                  </button>
-                </li>
-                <li style="padding: 2px 5px"><code id="sql-query-5">UPDATE ABS.TGSCHFALL SET SPERRUSER = '';</code>              
-                  <button class="copytoeditor-btn btn btn-xs" type="submit" data-clipboard-target="#sql-query-5">
-                    <span class="glyphicon glyphicon-copy"></span>&nbsp;Copy into Editor
+                  <button class="copytoeditor-btn btn btn-xs" type="submit" v-on:click="removeBookmark(index)">
+                      <span class="glyphicon glyphicon-trash"></span>&nbsp;Remove
                   </button>
                 </li>
               </ul>

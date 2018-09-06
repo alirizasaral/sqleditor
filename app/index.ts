@@ -9,7 +9,6 @@ import Toasted from 'vue-toasted';
 
 const MAX_HISTORY_SIZE = 10;
 
-
 class ValidationDisplay {
 
   success(toastr, msg:string) {
@@ -116,10 +115,13 @@ Vue.filter('formatDate', function(value) {
 
 Vue.use(Toasted);
 
+let bookmarks: Array<string> = [];
+
 const app = new Vue({
   el: '#wrap',
   data: {
     sqls: 'SELECT * FROM SCHEMA.TABLE;',
+    bookmarks: bookmarks,
     last_result: []
   },
   
@@ -139,19 +141,34 @@ const app = new Vue({
       });
     }
   },
-
+  
   created: function () {
     window.addEventListener('keyup', this.shortcutHandler);
+    this.loadBookmarks();
   },
-
-  methods: {        
-    reset: function() {
-        this.sqls = '';
+  
+  methods: {
+    addBookmark: function() {
+      this.bookmarks.push((<any>window).editor.getValue());
+    },
+    removeBookmark: function(index:number) {
+      this.bookmarks.splice(index, 1);
+    },
+    saveBookmarks: function() {
+      let state = JSON.stringify(this.bookmarks);
+      localStorage.setItem('bookmarks', state);
+    },
+    loadBookmarks: function() {
+      let state = localStorage.getItem('bookmarks');
+      if (state != null) {
+        this.bookmarks = JSON.parse(state);
+      }
     },
 
+    reset: () => {app.sqls = ''},
     shortcutHandler: function(e) {
       if (e.altKey && e.keyCode === 38) {
-          sqlHistory.next();
+        sqlHistory.next();
       } else if (e.altKey  &&  e.keyCode === 40) {
           sqlHistory.prev();
       } else if (e.altKey &&  e.keyCode === 13) {
