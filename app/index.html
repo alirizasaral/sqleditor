@@ -39,6 +39,9 @@
             <p>Execute <b>one query at a time</b>. Bulk-Queries are not allowed.</p>
             <p>Consider the <b>performance and the result set size</b> of your queries. You may get gateway timeout, although your query is still being executed in the background, if the execution is taking too long.</p>
             <p>Use <b style="font-family: 'Courier New', Courier, monospace"> /*    */ </b> to comment multiple lines and <b style="font-family: 'Courier New', Courier, monospace">-- </b> to comment the rest of a single line. Do not use <b style="font-family: 'Courier New', Courier, monospace">#</b>.</p>
+            <p>Use <b> alt-space </b> to execute your query.</p>
+            <p>Use <b> alt-up </b> or <b>alt+down</b> to navigate in your history.</p>
+            <p>Use <b> alt-up </b> or <b>alt+b</b> to bookmark your query. It will then show up in auto-completion list.</p>
           </div>
         </div>
       </div>
@@ -103,7 +106,7 @@
             <div class="panel-body">
               <ul>
                 <li v-for="(bookmark, index) in bookmarks" :key="bookmark" style="padding: 2px 5px"><code id="sql-query-1">{{bookmark}}</code>              
-                  <button class="copytoeditor-btn btn btn-xs" type="submit" data-clipboard-target="#sql-query-1">
+                  <button class="copytoeditor-btn btn btn-xs" type="submit" v-on:click="useBookmark(index)">
                     <span class="glyphicon glyphicon-copy"></span>&nbsp;Copy into Editor
                   </button>
                   <button class="copytoeditor-btn btn btn-xs" type="submit" v-on:click="removeBookmark(index)">

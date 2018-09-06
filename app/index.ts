@@ -88,11 +88,21 @@ class SQLHistoryStore {
   }
 }
 
+function addBookmarksToEditorAutoCompletion(provideList:Function) {
+  var orig = codemirror.hint.sql;
+  codemirror.hint.sql = function(cm) {
+    var inner = orig(cm) || {from: cm.getCursor(), to: cm.getCursor(), list: []};
+    inner.list.push.apply(inner.list, provideList());
+    return inner;
+  };
+}
+
 let sqlHistory = new SQLHistoryStore();
 let validationDisplay = new ValidationDisplay();
 
 window.onload = function () {
-  
+
+
   var textarea = document.getElementById("editor_area") as HTMLTextAreaElement;
   (<any>window).editor = codemirror.fromTextArea(textarea, {
     mode: 'text/x-mariadb',
@@ -103,6 +113,7 @@ window.onload = function () {
     autofocus: true,
     extraKeys: { "Ctrl-Space": "autocomplete" }
   });
+  
   sqlHistory.setEditor((<any>window).editor);
 }
 
@@ -145,14 +156,21 @@ const app = new Vue({
   created: function () {
     window.addEventListener('keyup', this.shortcutHandler);
     this.loadBookmarks();
+    let bookmarks = this.bookmarks;
+    addBookmarksToEditorAutoCompletion(function() {return bookmarks});
   },
   
   methods: {
     addBookmark: function() {
       this.bookmarks.push((<any>window).editor.getValue());
+      this.saveBookmarks();
     },
     removeBookmark: function(index:number) {
       this.bookmarks.splice(index, 1);
+      this.saveBookmarks();
+    },
+    useBookmark: function(index:number) {
+      (<any>window).editor.setValue(this.bookmarks[index]);
     },
     saveBookmarks: function() {
       let state = JSON.stringify(this.bookmarks);
@@ -173,6 +191,8 @@ const app = new Vue({
           sqlHistory.prev();
       } else if (e.altKey &&  e.keyCode === 13) {
           this.execute();
+      } else if (e.altKey &&  e.keyCode === 66) {
+          this.addBookmark();
       } else if (e.altKey) {
           console.log(e.keyCode);
       };
