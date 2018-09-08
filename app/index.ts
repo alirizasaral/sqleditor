@@ -6,6 +6,7 @@ import "codemirror/addon/hint/show-hint"
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/hint/show-hint.css'
 import Toasted from 'vue-toasted';
+import axios from 'axios';
 
 const MAX_HISTORY_SIZE = 10;
 
@@ -13,6 +14,10 @@ class ValidationDisplay {
 
   success(toastr, msg:string) {
     return this.showMessage(toastr, msg, 'success', 'thumb_up_alt', false);
+  }
+
+  error(toastr, msg:string) {
+    return this.showMessage(toastr, msg, 'error', 'error', true);
   }
 
   showMessage(toastr, msg:string, type:string, icon:string, keep:boolean) {
@@ -199,8 +204,20 @@ const app = new Vue({
   },
 
     execute: function() {
-      validationDisplay.success((<any>app).$toasted, 'Executing query. This may take a while.');
+      let toast = validationDisplay.success((<any>app).$toasted, 'Executing query. This may take a while.');
       sqlHistory.store();
+      
+      let query = (<any>window).editor.getValue();
+      axios.post('/execute', {query: query})
+           .then(function (response) {
+             toast.goAway();
+             app.last_result = response.data.result;
+             validationDisplay.success((<any>app).$toasted, response.data.message);
+           })
+           .catch(function (event) {
+            toast.goAway();
+            validationDisplay.error((<any>app).$toasted, event.response.data.message);
+           })
     }
   }
 });
