@@ -14,10 +14,11 @@
     "editor",
     "sqleditor",
     "web-based",
-    "db2"
+    "db2",
+    "postgresql"
   ],
   "author": "aliriza.saral@gmail.com",
-  "license": "ISC",
+  "license": "EPL",
   "devDependencies": {
     "@types/node": "^10.9.4",
     "css-loader": "^1.0.0",
