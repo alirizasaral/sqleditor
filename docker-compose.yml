@@ -1,0 +1,22 @@
+version: '3'
+services:
+  sqleditor:
+    build: .
+    links:
+      - "postgres:postgres"
+    environment:
+      - DB_TYPE=postgres
+      - DB_UID=postgres
+      - DB_PWD=mysecretpassword
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=postgres
+    ports:
+      - "80:80"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword

@@ -162,9 +162,9 @@ app = Flask(__name__)
 def index():
     return send_from_directory('./', 'index.html')
 
-@app.route('/dist/<path:path>')
-def send_dist(path):
-    return send_from_directory('dist', path)
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
 
 @app.route('/execute', methods=['POST'])
 def execute():
