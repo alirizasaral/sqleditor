@@ -2,7 +2,7 @@ from flask import Flask
 from flask import render_template
 from flask import request, send_from_directory
 import json
-#import ibm_db
+import ibm_db
 import re
 import os
 from sqlalchemy import create_engine
@@ -47,36 +47,16 @@ class SQLStatement:
                 msg = str(e)
             return {'result': [], 'message': 'Query failed: ' + msg}, 500
 
-class DB:
+class DB2:
 
-    def __init__(self):
-        self.host, self.port, self.database, self.username, self.password = self.retrieve_connection_params()
+    def __init__(self, configuration):
+        self.connection_string = self.create_db_url(configuration)
 
-    def retrieve_connection_envs(self):
-        values = {}
-        for key in ['ABSDB_JDBCURL', 'ABSDB_USERNAME_PLAIN', 'ABSDB_PASSWORD_PLAIN']:
-            values[key] = os.environ.get(key)
-            if not values[key]:
-                raise ValueError('Missing environtment variable ' + key)
-                exit()
-        return values
-
-    def retrieve_connection_host(self, jdbc_url):
-        m = re.search("(^[\w|\.]+)\:([\d]+)+\/([\w]+)", jdbc_url)
-        if len(m.groups()) != 3:
-            raise ValueError('Host, port and database could not be found in the environtment variable ABSDB_JDBCURL: ' + jdbc_url)
-            exit()
-        
-        host, port, database = m.group(1), m.group(2), m.group(3)
-        return host, port, database
-
-    def retrieve_connection_params(self):
-        envs = self.retrieve_connection_envs()
-        host, port, database = self.retrieve_connection_host(envs['ABSDB_JDBCURL'])
-        return host, port, database, envs['ABSDB_USERNAME_PLAIN'], envs['ABSDB_PASSWORD_PLAIN']
+    def create_db_url(self, configuration):
+        return 'DATABASE={DB_NAME};HOSTNAME={DB_HOST};PORT={DB_PORT};PROTOCOL=TCPIP;UID={DB_UID};PWD={DB_PWD}'.format(**configuration)
 
     def connect(self):
-        connection = ibm_db.connect('DATABASE={};HOSTNAME={};PORT={};PROTOCOL=TCPIP;UID={};PWD={}'.format(self.database, self.host, self.port, self.username, self.password), '', '')
+        connection = ibm_db.connect(self.connection_string, '', '')
         return connection
 
     def execute_one(self, sql):
@@ -111,8 +91,11 @@ def check_env():
 
 class PostgresDB:
 
-    def __init__(self, engine):
-        self.engine = engine
+    def __init__(self, configuration):
+        self.engine = create_engine(self.create_db_url(configuration), convert_unicode=True)
+
+    def create_db_url(self, configuration):
+        return 'postgresql+psycopg2://{DB_UID}:{DB_PWD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'.format(**configuration)
     
     def process_result(self, result):
         values = result.fetchall()
@@ -136,26 +119,25 @@ class PostgresDB:
 class DBFactory:
 
     def __init__(self):
-        self.url_templates = {
-            'postgres': 'postgresql+psycopg2://{DB_UID}:{DB_PWD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-        }
+        self.db_types = {}
+    
+    def register(self, db_name, db_class):
+        self.db_types[db_name] = db_class
     
     def create(self, configuration):
-        url = self.create_db_url(configuration)
-        engine = create_engine(url, convert_unicode=True)
-        return PostgresDB(engine)
-
-
-    def create_db_url(self, configuration):
         db_type = configuration['DB_TYPE']
-        if not db_type in self.url_templates:
-            print('DB-Type "{type}" not recognized. Supported DB-Types are: {templates}'.format(type=db_type, templates=', '.join(self.url_templates.keys())))
-            exit()
-        db_url = self.url_templates[configuration['DB_TYPE']]
-        return db_url.format(**configuration)
+        if not db_type in self.db_types:
+            print('DB-Type "{type}" not recognized. Supported DB-Types are: {types}'.format(type=db_type, types=', '.join(self.db_types.keys())))
+            exit()        
+        return self.db_types[db_type](configuration)
+
+
+factory = DBFactory()
+factory.register('postgres', PostgresDB)
+factory.register('db2', DB2)
 
 configuration = check_env()
-db = DBFactory().create(configuration)
+db = factory.create(configuration)
 app = Flask(__name__)
 
 @app.route('/')
