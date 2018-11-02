@@ -163,9 +163,21 @@ const app = new Vue({
     this.loadBookmarks();
     let bookmarks = this.bookmarks;
     addBookmarksToEditorAutoCompletion(function() {return bookmarks});
+    this.loadConfiguration();
   },
   
   methods: {
+    loadConfiguration() {
+      axios.get('/config')
+          .then(function (response) {
+            (<any>window).editor.setValue(response.data['initial_query']);
+            if ((<any>app).bookmarks.length == 0) {
+              (<any>app).bookmarks = response.data['bookmarks'];
+            }
+          })
+
+    },
+
     addBookmark: function() {
       this.bookmarks.push((<any>window).editor.getValue());
       this.saveBookmarks();

@@ -144,6 +144,13 @@ app = Flask(__name__)
 def index():
     return send_from_directory('./', 'index.html')
 
+@app.route('/config')
+def config():
+    config = {'bookmarks': os.environ.get('BOOKMARKS'),
+            'initial_query': os.environ.get('INITIAL_QUERY')}
+    return json.dumps(config, indent=4, sort_keys=True, default=str), 200
+
+
 @app.route('/static/<path:path>')
 def send_static(path):
     return send_from_directory('static', path)
