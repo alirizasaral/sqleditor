@@ -87,6 +87,8 @@ def check_env():
         print("Following mandatory environment variables are missing: " + str(missing_values))
         exit()
     else:
+        config_values['INITIAL_BOOKMARKS'] = os.environ.get('INITIAL_BOOKMARKS', default='[]')
+        config_values['INITIAL_QUERY'] = os.environ.get('INITIAL_QUERY', default='SELECT * FROM SCHEMA.TABLE;')
         return config_values
 
 class PostgresDB:
@@ -140,14 +142,17 @@ configuration = check_env()
 db = factory.create(configuration)
 app = Flask(__name__)
 
+def load_config():
+    return {'initial_bookmarks': os.environ.get('INITIAL_BOOKMARKS'),
+            'initial_query': os.environ.get('INITIAL_QUERY')}
+
 @app.route('/')
 def index():
-    return send_from_directory('./', 'index.html')
+    return render_template('index.html', config=load_config())
 
 @app.route('/config')
 def config():
-    config = {'bookmarks': os.environ.get('BOOKMARKS'),
-            'initial_query': os.environ.get('INITIAL_QUERY')}
+    config = load_config()
     return json.dumps(config, indent=4, sort_keys=True, default=str), 200
 
 

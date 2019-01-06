@@ -9,6 +9,8 @@ import Toasted from 'vue-toasted';
 import axios from 'axios';
 
 const MAX_HISTORY_SIZE = 10;
+declare var initial_bookmarks: Array<string>;
+declare var initial_query: string;
 
 class ValidationDisplay {
 
@@ -136,7 +138,7 @@ let bookmarks: Array<string> = [];
 const app = new Vue({
   el: '#wrap',
   data: {
-    sqls: 'SELECT * FROM SCHEMA.TABLE;',
+    sqls: initial_query,
     bookmarks: bookmarks,
     last_result: []
   },
@@ -163,21 +165,9 @@ const app = new Vue({
     this.loadBookmarks();
     let bookmarks = this.bookmarks;
     addBookmarksToEditorAutoCompletion(function() {return bookmarks});
-    this.loadConfiguration();
   },
   
   methods: {
-    loadConfiguration() {
-      axios.get('/config')
-          .then(function (response) {
-            (<any>window).editor.setValue(response.data['initial_query']);
-            if ((<any>app).bookmarks.length == 0) {
-              (<any>app).bookmarks = response.data['bookmarks'];
-            }
-          })
-
-    },
-
     addBookmark: function() {
       this.bookmarks.push((<any>window).editor.getValue());
       this.saveBookmarks();
@@ -197,6 +187,9 @@ const app = new Vue({
       let state = localStorage.getItem('bookmarks');
       if (state != null) {
         this.bookmarks = JSON.parse(state);
+      }
+      if (this.bookmarks.length == 0) {
+        this.bookmarks = initial_bookmarks;
       }
     },
 
